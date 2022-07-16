@@ -4,7 +4,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
+
+var db *gorm.DB
+
+type Handler struct {
+	db *gorm.DB
+}
+
+func newHandler(db *gorm.DB) *Handler {
+	return &Handler{db}
+}
 
 type Note struct {
 	ID      string `json:"id"`
@@ -12,51 +24,60 @@ type Note struct {
 	Content string `json:"content"`
 }
 
-var notes = []Note{
-	{ID: "1", Title: "test first time", Content: "นี้คือบทความแรกของฉัน"},
-	{ID: "2", Title: "บทความที่ 2", Content: "this is second note."},
+func (h *Handler) listNotesHandler(c *gin.Context) {
+	var notes []Note
+	if result := h.db.Find(&notes); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, &notes)
 }
 
-func listNotesHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, notes)
-}
-
-func createNoteHandler(c *gin.Context) {
+func (h *Handler) createNoteHandler(c *gin.Context) {
 	var note Note
-
 	if err := c.ShouldBindJSON(&note); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
-
-	notes = append(notes, note)
-
-	c.JSON(http.StatusCreated, note)
+	if result := h.db.Create(&note); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusCreated, &note)
 }
 
-func deleteNoteHandler(c *gin.Context) {
+func (h *Handler) deleteNoteHandler(c *gin.Context) {
 	id := c.Param("id")
-
-	for i, a := range notes {
-		if a.ID == id {
-			notes = append(notes[:i], notes[i+1:]...)
-			break
-		}
+	if result := h.db.Delete(&Note{}, id); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error.Error(),
+		})
+		return
 	}
-
 	c.Status(http.StatusNoContent)
 }
 
 func main() {
+	var err error
+	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	db.AutoMigrate(&Note{})
+
+	handler := newHandler(db)
+
 	r := gin.New()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello World!",
-		})
-	})
-	r.GET("/notes", listNotesHandler)
-	r.POST("/notes", createNoteHandler)
-	r.DELETE("/notes/:id", deleteNoteHandler)
+	r.GET("/notes", handler.listNotesHandler)
+	r.POST("/notes", handler.createNoteHandler)
+	r.DELETE("/notes/:id", handler.deleteNoteHandler)
 	r.Run()
 }
