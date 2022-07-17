@@ -11,9 +11,8 @@ type NoteHandler struct {
 	noteUseCase usecases.NoteUseCase
 }
 
-func NewNoteHandler() *NoteHandler {
-	noteUseCase := usecases.NewNoteUseCase()
-	return &NoteHandler{*noteUseCase}
+func NewNoteHandler(noteUseCase usecases.NoteUseCase) *NoteHandler {
+	return &NoteHandler{noteUseCase}
 }
 
 func (t *NoteHandler) GetAll(c *gin.Context) {
