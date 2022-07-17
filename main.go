@@ -12,6 +12,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/api/iterator"
 	"pinpong.co/rest-go/models"
+	"pinpong.co/rest-go/repositories"
 
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/option"
@@ -66,14 +67,13 @@ func (route *App) findById(c *gin.Context) {
 }
 
 type App struct {
-	//Router *mux.Router
 	client *firestore.Client
 	ctx    context.Context
 }
 
 func (route *App) Init() {
 	route.ctx = context.Background()
-	opt := option.WithCredentialsFile("my-test-firebase-e0b24-firebase-adminsdk-88aai-3b0e645857.json")
+	opt := option.WithCredentialsFile("util/my-test-firebase-e0b24-firebase-adminsdk-88aai-3b0e645857.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalln(err)
@@ -179,10 +179,19 @@ func (route *App) deleteNoteHandler(c *gin.Context) {
 }
 
 func main() {
+
 	route := App{}
 	route.Init()
+	noteRepo := repositories.NewNoteRepository()
 
 	r := gin.New()
+	r.GET("/test", func(c *gin.Context) {
+		data, err := noteRepo.GetAll()
+		if err != nil {
+			return
+		}
+		c.JSON(http.StatusOK, data)
+	})
 	r.GET("/notes", route.get)
 	r.GET("/notes/:id", route.findById)
 	r.POST("/notes", route.createNoteHandler)
