@@ -16,7 +16,7 @@ func NewNoteHandler(noteUseCase usecases.NoteUseCase) *NoteHandler {
 }
 
 func (t *NoteHandler) GetAll(c *gin.Context) {
-	res, err := t.noteUseCase.GetAll()
+	res, err := t.noteUseCase.FindAll()
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
