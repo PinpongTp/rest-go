@@ -18,7 +18,7 @@ func NewNoteRepository() *NoteRepository {
 	return &NoteRepository{*conn}
 }
 
-func (t *NoteRepository) GetAll() (note *[]models.Note, err error) {
+func (t *NoteRepository) GetAll() (note []models.Note, err error) {
 	Datas := []models.Note{}
 
 	item := t.conn.Client.Collection("notes").Documents(t.conn.Ctx)
@@ -34,5 +34,5 @@ func (t *NoteRepository) GetAll() (note *[]models.Note, err error) {
 		mapstructure.Decode(doc.Data(), &Data)
 		Datas = append(Datas, Data)
 	}
-	return &Datas, nil
+	return Datas, nil
 }
