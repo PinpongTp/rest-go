@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"pinpong.co/rest-go/deliveries"
 	"pinpong.co/rest-go/repositories"
@@ -13,6 +14,7 @@ func SetupRouter() *gin.Engine {
 	noteHandler := deliveries.NewNoteHandler(*noteUseCase)
 
 	r := gin.Default()
+	r.Use(cors.Default())
 	v1 := r.Group("/v1")
 	{
 		v1.GET("note", noteHandler.FindAll)
