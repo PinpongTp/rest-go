@@ -5,16 +5,16 @@ import (
 	"pinpong.co/rest-go/repositories"
 )
 
-type noteUseCase struct {
+type NoteUseCase struct {
 	noteRepo repositories.NoteRepository
 }
 
-func NewNoteUseCase() *noteUseCase {
+func NewNoteUseCase() *NoteUseCase {
 	noteRepo := repositories.NewNoteRepository()
-	return &noteUseCase{*noteRepo}
+	return &NoteUseCase{*noteRepo}
 }
 
-func (t *noteUseCase) GetAll() (notes []models.Note, err error) {
+func (t *NoteUseCase) GetAll() (notes []models.Note, err error) {
 	var note []models.Note
 	note, err = t.noteRepo.GetAll()
 
