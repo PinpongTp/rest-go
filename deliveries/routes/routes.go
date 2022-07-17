@@ -15,7 +15,11 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	v1 := r.Group("/v1")
 	{
-		v1.GET("note", noteHandler.GetAll)
+		v1.GET("note", noteHandler.FindAll)
+		v1.GET("note/:id", noteHandler.FindById)
+		v1.POST("note", noteHandler.Create)
+		v1.PUT("note", noteHandler.Update)
+		v1.DELETE("note/:id", noteHandler.Delete)
 	}
 	return r
 }

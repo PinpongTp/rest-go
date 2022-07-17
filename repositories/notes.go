@@ -1,8 +1,10 @@
 package repositories
 
 import (
+	"errors"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/api/iterator"
 	"pinpong.co/rest-go/models"
@@ -62,6 +64,7 @@ func (t *NoteRepository) Save(note models.Note) (Datas models.Note, err error) {
 	if len(note.Id) == 0 {
 
 		// create
+		note.Id = uuid.New().String()
 		q := t.conn.Client.Collection("notes")
 		_, _, err = q.Add(t.conn.Ctx, &note)
 		if err != nil {
@@ -106,6 +109,9 @@ func (t *NoteRepository) DeleteById(id string) (err error) {
 			log.Fatalln(err)
 		}
 		refId = doc.Ref.ID
+	}
+	if len(refId) == 0 {
+		return errors.New("note id invalid!")
 	}
 	_, err = t.conn.Client.Collection("notes").Doc(refId).Delete(t.conn.Ctx)
 	if err != nil {
