@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/api/iterator"
+	"pinpong.co/rest-go/deliveries/routes"
 	"pinpong.co/rest-go/models"
-	"pinpong.co/rest-go/repositories"
 
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/option"
@@ -179,23 +179,6 @@ func (route *App) deleteNoteHandler(c *gin.Context) {
 }
 
 func main() {
-
-	route := App{}
-	route.Init()
-	noteRepo := repositories.NewNoteRepository()
-
-	r := gin.New()
-	r.GET("/test", func(c *gin.Context) {
-		data, err := noteRepo.GetAll()
-		if err != nil {
-			return
-		}
-		c.JSON(http.StatusOK, data)
-	})
-	r.GET("/notes", route.get)
-	r.GET("/notes/:id", route.findById)
-	r.POST("/notes", route.createNoteHandler)
-	r.PUT("/notes", route.updateNoteHandler)
-	r.DELETE("/notes/:id", route.deleteNoteHandler)
+	r := routes.SetupRouter()
 	r.Run()
 }
