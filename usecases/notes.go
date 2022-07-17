@@ -15,7 +15,7 @@ func NewNoteUseCase(noteRepo repositories.NoteRepository) *NoteUseCase {
 
 func (t *NoteUseCase) GetAll() (notes []models.Note, err error) {
 	var note []models.Note
-	note, err = t.noteRepo.GetAll()
+	note, err = t.noteRepo.FindAll()
 
 	return note, err
 }
